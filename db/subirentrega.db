@@ -1,0 +1,6 @@
+CREATE TABLE pagos_cuotas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    placa_moto VARCHAR(20) NOT NULL,
+    archivo_recibo VARCHAR(255) NOT NULL,
+    fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
