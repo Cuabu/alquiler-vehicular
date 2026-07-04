@@ -1,7 +1,0 @@
-.motos__section1 {
-    display: flex;
-    justify-content: center;  /* centra horizontal */
-    align-items: center;      /* centra vertical */
-    min-height: 300px;        /* altura mínima para que se note el centrado */
-    text-align: center;       /* centra el texto dentro */
-}
