@@ -41,7 +41,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
 
                 // Generar nombre único corto para no exceder VARCHAR(50)
-                // Ejemplo: pag_1720226000.jpg (aprox. 18 caracteres)
                 $nombre_archivo = "pag_" . time() . "." . $extension;
                 $ruta_destino = $directorio . $nombre_archivo;
 
@@ -85,7 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt_insertar->bind_param("isdss", $alquiler_id, $metodo, $valor, $placa, $comprobante_pago);
 
                 if ($stmt_insertar->execute()) {
-                    $mensaje = "¡Pago registrado exitosamente para el vehículo con placa <strong>" . htmlspecialchars($placa) . "</strong>!";
+                    $mensaje = "<i class='bi bi-check-circle-fill me-2'></i> ¡Pago registrado exitosamente para el vehículo con placa <strong>" . htmlspecialchars($placa) . "</strong>!";
                     $tipo_alerta = "success";
                 } else {
                     $mensaje = "Error al guardar en la base de datos: " . $conexion->error;
@@ -94,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt_insertar->close();
 
             } else {
-                $mensaje = "No se encontró ningún alquiler con estado <strong>Activo</strong> para la placa: " . htmlspecialchars($placa);
+                $mensaje = "<i class='bi bi-exclamation-triangle-fill me-2'></i> No se encontró ningún alquiler con estado <strong>Activo</strong> para la placa: " . htmlspecialchars($placa);
                 $tipo_alerta = "danger";
                 $stmt_buscar->close();
             }
@@ -113,62 +112,153 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Pago - G00gle</title>
+    
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
     <style>
+        :root {
+            --bg-light: #f4f7f6;
+            --brand-gradient: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%);
+        }
+
         body {
-            background: #f4f6f9;
+            background-color: var(--bg-light);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
-        .navbar-brand {
-            font-weight: bold;
+
+        .navbar {
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
         }
+
+        .hero-mini {
+            background: var(--brand-gradient);
+            color: white;
+            padding: 40px 20px 80px;
+            text-align: center;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+        }
+
+        .form-container {
+            margin-top: -50px;
+            z-index: 10;
+            position: relative;
+        }
+
         .card {
             border: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            background: white;
+        }
+
+        .card-header {
+            border-bottom: 1px solid #edf2f7;
+            font-weight: 600;
+            color: #2b3a4a;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 10px 14px;
+            border: 1px solid #ced4da;
+        }
+
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+        }
+
+        /* Fuerza las letras a mostrarse en mayúsculas en el input */
+        #placa {
+            text-transform: uppercase;
+        }
+
+        .btn-custom {
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 500;
+        }
+
+        /* Contenedor de previsualización */
+        #preview-container {
+            display: none;
+            max-width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
         }
     </style>
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
 
-<nav class="navbar navbar-dark bg-primary mb-4">
+<!-- Barra de Navegación Superior -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
     <div class="container">
-        <a class="navbar-brand" href="../index.php">💳 G00gle - Gestión de Pagos</a>
-        <a href="../index.php" class="btn btn-outline-light btn-sm">Volver al Panel</a>
+        <a class="navbar-brand fw-bold text-primary" href="../index.php">
+            <i class="bi bi-grid-1x2-fill me-2"></i> G00gle Panel
+        </a>
+        <div class="d-flex">
+            <a href="../index.php" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Volver al Panel
+            </a>
+        </div>
     </div>
 </nav>
 
-<div class="container mb-5">
+<!-- Encabezado de la sección -->
+<header class="hero-mini">
+    <div class="container">
+        <h2 class="fw-bold mb-0"><i class="bi bi-credit-card-2-front-fill me-2"></i>Gestión de Pagos</h2>
+    </div>
+</header>
+
+<!-- Contenedor del Formulario -->
+<main class="container form-container mb-5">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
             
+            <!-- Mensajes de Alerta -->
             <?php if (!empty($mensaje)): ?>
-                <div class="alert alert-<?php echo $tipo_alerta; ?> alert-dismissible fade show" role="alert">
-                    <?php echo $mensaje; ?>
+                <div class="alert alert-<?php echo $tipo_alerta; ?> alert-dismissible fade show border-0 shadow-sm rounded-3 mb-4" role="alert">
+                    <div class="d-flex align-items-center">
+                        <div><?php echo $mensaje; ?></div>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
 
+            <!-- Tarjeta Principal del Formulario -->
             <div class="card">
-                <div class="card-header bg-white py-3">
-                    <h4 class="mb-0 text-center">Formulario de Registro de Pago</h4>
+                <div class="card-header bg-white py-3 text-center">
+                    <h5 class="mb-0 fw-bold text-secondary">Registrar Nuevo Pago</h5>
                 </div>
                 <div class="card-body p-4">
                     
                     <form action="registrar.php" method="POST" enctype="multipart/form-data">
                         
+                        <!-- Campo: Placa -->
                         <div class="mb-3">
-                            <label for="placa" class="form-label fw-bold">Placa del Vehículo *</label>
-                            <input type="text" class="form-control" id="placa" name="placa" placeholder="Ej. ABC123" required>
-                            <div class="form-text">El sistema buscará el alquiler activo asociado a esta placa.</div>
+                            <label for="placa" class="form-label fw-semibold text-dark">Placa del Vehículo <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="placa" name="placa" placeholder="Ej. ABC123" required maxlength="10">
+                            <div class="form-text text-muted">El sistema buscará el alquiler activo asociado a esta placa.</div>
                         </div>
 
+                        <!-- Campo: Valor -->
                         <div class="mb-3">
-                            <label for="valor" class="form-label fw-bold">Valor a Pagar ($) *</label>
-                            <input type="number" step="0.01" class="form-control" id="valor" name="valor" placeholder="0.00" required>
+                            <label for="valor" class="form-label fw-semibold text-dark">Valor a Pagar ($) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted">$</span>
+                                <input type="number" step="0.01" class="form-control" id="valor" name="valor" placeholder="0.00" min="0.01" required>
+                            </div>
                         </div>
 
+                        <!-- Campo: Método -->
                         <div class="mb-3">
-                            <label for="metodo" class="form-label fw-bold">Método de Pago *</label>
+                            <label for="metodo" class="form-label fw-semibold text-dark">Método de Pago <span class="text-danger">*</span></label>
                             <select class="form-select" id="metodo" name="metodo" required>
                                 <option value="">Seleccione una opción...</option>
                                 <option value="Efectivo">Efectivo</option>
@@ -179,15 +269,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             </select>
                         </div>
 
+                        <!-- Campo: Comprobante (Imagen) -->
                         <div class="mb-4">
-                            <label for="comprobante" class="form-label fw-bold">Comprobante de Pago (Imagen) *</label>
+                            <label for="comprobante" class="form-label fw-semibold text-dark">Comprobante de Pago (Imagen) <span class="text-danger">*</span></label>
                             <input type="file" class="form-control" id="comprobante" name="comprobante" accept="image/png, image/jpeg, image/jpg, image/webp" required>
-                            <div class="form-text">Sube la captura de la transferencia o factura (JPG, PNG, WEBP). Se guardará en la columna 'comprobante_pago'.</div>
+                            <div class="form-text text-muted mb-3">Formatos admitidos: JPG, PNG, WEBP.</div>
+                            
+                            <!-- Área de previsualización dinámica -->
+                            <div id="preview-container" class="text-center p-2 bg-light">
+                                <p class="small text-muted mb-1 fw-bold">Vista previa del comprobante:</p>
+                                <img id="image-preview" src="#" alt="Vista previa" class="img-fluid rounded" style="max-height: 200px;">
+                            </div>
                         </div>
 
+                        <!-- Botones de Acción -->
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-warning fw-bold py-2">💾 Guardar Pago</button>
-                            <a href="../index.php" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-warning text-dark fw-bold btn-custom shadow-sm">
+                                <i class="bi bi-floppy-fill me-2"></i> Guardar Pago
+                            </button>
+                            <a href="../index.php" class="btn btn-light btn-custom border">Cancelar</a>
                         </div>
 
                     </form>
@@ -197,13 +297,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         </div>
     </div>
-</div>
+</main>
 
+<!-- Pie de Página -->
 <footer class="text-center mt-auto mb-4 text-secondary">
-    © <?php echo date("Y"); ?> G00gle - Proyecto Académico
+    <small>© <?php echo date("Y"); ?> G00gle - Proyecto Académico</small>
 </footer>
 
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script para previsualizar la imagen cargada en tiempo real -->
+<script>
+    document.getElementById('comprobante').addEventListener('change', function(e) {
+        const reader = new FileReader();
+        const previewContainer = document.getElementById('preview-container');
+        const imagePreview = document.getElementById('image-preview');
+
+        if(e.target.files[0]) {
+            reader.readAsDataURL(e.target.files[0]);
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                previewContainer.style.display = 'block';
+            }
+        } else {
+            previewContainer.style.display = 'none';
+        }
+    });
+</script>
+
 </body>
 </html>
 <?php
