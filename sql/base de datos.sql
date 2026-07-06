@@ -1,11 +1,11 @@
-CREATE DATABASE alquiler_vehiculos;
-USE alquiler_vehiculos;
+CREATE DATABASE alquiler;
+USE alquiler;
 
 -- ===========================
--- TABLA DE CLIENTES
+-- TABLA DE USUARIOS    
 -- ===========================
 
-CREATE TABLE clientes (
+CREATE TABLE usuarios (
 
     id INT AUTO_INCREMENT PRIMARY KEY,
 
@@ -145,7 +145,9 @@ CREATE TABLE pagos (
 
     valor DECIMAL(12,2),
 
-    referencia VARCHAR(100),
+    placa VARCHAR(20),
+
+    comprobante_pago VARCHAR(50),
 
     FOREIGN KEY(alquiler_id)
     REFERENCES alquileres(id)
